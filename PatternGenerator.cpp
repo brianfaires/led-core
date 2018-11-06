@@ -57,7 +57,6 @@ void PatternGenerator::WriteColorPattern_Gradient(PRGB* outputArray) {
 	uint8_t adjLength = segLength;
 	if(segLength*numColors + extraPixels < colorPeriod) {
 		adjLength++;
-		extraPixels++;
 	}
 	
     for(uint8_t j = 0; j < adjLength; j++) {
@@ -66,6 +65,8 @@ void PatternGenerator::WriteColorPattern_Gradient(PRGB* outputArray) {
       pattern[segLength*i + j + extraPixels] = (PRGB) { i, b, blendAmount};
       //Serial.println(String(i) + "/" + String(j) + ": " + String(i == numColors-1 ? 0 : i+1) + ", " + String(j * 255 / adjLength));
     }
+	
+	if(adjLength > segLength) { extraPixels++; }
   }
 
   memcpy(outputArray, pattern, sizeof(PRGB)*colorPeriod);
