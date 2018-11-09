@@ -8,6 +8,11 @@ PatternGenerator::PatternGenerator() {
   colorPeriod = 0;
 }
 
+void PatternGenerator::Init(PaletteManager* _pm, GammaManager* gm) {
+	pm = _pm;
+	Gamma = gm;
+}
+
 void PatternGenerator::WriteDimPattern(uint8_t targetDimPatternIndex, uint8_t* outputArray) {
   if(targetDimPatternIndex >= NUM_DIM_PATTERNS) { THROW("targetDimPatternIndex out of bounds: " + String(targetDimPatternIndex)) }
   if(2*transLength + brightLength + 2 > dimPeriod) { THROW("parameters for PatternGenerator cause oversized dimPeriod.") }
@@ -35,7 +40,7 @@ void PatternGenerator::WriteDimPattern(uint8_t targetDimPatternIndex, uint8_t* o
   //for(uint8_t i =0; i < dimPeriod; i++) { Serial.println(String(i) + ": " + outputArray[i]);}
 }
 
-void PatternGenerator::WriteColorPattern(uint8_t targetColorPatternIndex, PRGB* outputArray) {
+void PatternGenerator::WriteColorPattern(uint8_t targetColorPatternIndex, CRGB* outputArray) {
   if(targetColorPatternIndex >= NUM_COLOR_PATTERNS) { THROW("targetColorPatternIndex out of bounds: " + String(targetColorPatternIndex)) }
   if(colorPeriod > MAX_PERIOD) { THROW("colorPeriod of " + String(colorPeriod) + " is larger than MAX_PERIOD.") }
   
@@ -47,9 +52,7 @@ void PatternGenerator::WriteColorPattern(uint8_t targetColorPatternIndex, PRGB* 
   //for(uint8_t i =0; i < colorPeriod; i++) { Serial.println(String(i) + ": (" + outputArray[i].a + ", " + outputArray[i].b + ", " + outputArray[i].blendAmount + ")"); }
 }
 
-void PatternGenerator::WriteColorPattern_Gradient(PRGB* outputArray) {
-  PRGB pattern[colorPeriod];
-  
+void PatternGenerator::WriteColorPattern_Gradient(CRGB* outputArray) {
   uint8_t segLength = colorPeriod / numColors;
   uint8_t extraPixels = 0;
 
@@ -59,21 +62,23 @@ void PatternGenerator::WriteColorPattern_Gradient(PRGB* outputArray) {
 		adjLength++;
 	}
 	
+	CRGB first = pm->palette[i];
+	CRGB second = i == numColors-1 ? pm->palette[0] : pm->palette[i+1];
+	Gamma->Inverse(first);
+	Gamma->Inverse(second);
+	
     for(uint8_t j = 0; j < adjLength; j++) {
-      uint8_t b = i == numColors-1 ? 0 : i+1; // Necessary because using "{ }" will convert to int and throw a warning
-      uint8_t blendAmount = j * 255 / adjLength; // Necessary because using "{ }" will convert to int and throw a warning
-      pattern[segLength*i + j + extraPixels] = (PRGB) { i, b, blendAmount};
-      //Serial.println(String(i) + "/" + String(j) + ": " + String(i == numColors-1 ? 0 : i+1) + ", " + String(j * 255 / adjLength));
+      uint8_t blendAmount = j * 255 / adjLength;
+	  uint16_t idx = segLength*i + j + extraPixels;
+      outputArray[idx] = blend(first, second, blendAmount);
+	  Gamma->Correct(outputArray[idx]);
     }
 	
 	if(adjLength > segLength) { extraPixels++; }
   }
-
-  memcpy(outputArray, pattern, sizeof(PRGB)*colorPeriod);
 }
 
-void PatternGenerator::WriteColorPattern_Blocks(PRGB* outputArray) {
-  PRGB pattern[colorPeriod];
+void PatternGenerator::WriteColorPattern_Blocks(CRGB* outputArray) {
   uint16_t colorLengths[numColors];
   uint16_t minLength = colorPeriod / numColors;
 
@@ -102,11 +107,9 @@ void PatternGenerator::WriteColorPattern_Blocks(PRGB* outputArray) {
   uint16_t pixel = 0;
   for(uint8_t col = 0; col < numColors; col++) {
     for(uint16_t i = 0; i < colorLengths[col]; i++) {
-      pattern[pixel++] = (PRGB){ col, 0, 0 };
+      outputArray[pixel++] = pm->palette[col];
     }
   }
-  
-  memcpy(outputArray, pattern, sizeof(PRGB)*colorPeriod);
 }
 
 

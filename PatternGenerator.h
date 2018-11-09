@@ -1,5 +1,7 @@
 #pragma once
 #include "PatternCommon.h"
+#include "GammaManager.h"
+#include "PaletteManager.h"
 
 #define GET_FADE_STEP_SIZE(x) 255.0f / (x+1)
 #define NUM_DIM_PATTERNS 16
@@ -11,12 +13,16 @@ class PatternGenerator {
     uint8_t numColors, brightLength, transLength, dimPeriod, colorPeriod;
     
     PatternGenerator();
-    void WriteDimPattern(uint8_t targetDimPatternIndex, uint8_t* outputArray);
-    void WriteColorPattern(uint8_t targetColorPatternIndex, PRGB* outputArray);
+    void Init(PaletteManager* _pm, GammaManager* gm);
+	void WriteDimPattern(uint8_t targetDimPatternIndex, uint8_t* outputArray);
+    void WriteColorPattern(uint8_t targetColorPatternIndex, CRGB* outputArray);
 
   private:
-    void WriteColorPattern_Gradient(PRGB* outputPattern);
-    void WriteColorPattern_Blocks(PRGB* outputPattern);
+	PaletteManager* pm;
+	GammaManager* Gamma;
+	
+    void WriteColorPattern_Gradient(CRGB* outputPattern);
+    void WriteColorPattern_Blocks(CRGB* outputPattern);
     
     void WriteDimPattern_Comet(uint8_t* outputPattern);
     void WriteDimPattern_ReverseComet(uint8_t* outputPattern);
