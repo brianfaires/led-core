@@ -25,6 +25,21 @@ void GammaManager::Init(const uint8_t* gamR, const uint8_t* gamG, const uint8_t*
   if(bright != NULL) { brightness = bright; }
 }
 
+CRGB GammaManager::Blend(CRGB a, CRGB b, uint8_t blendAmount) {
+	Inverse(a);
+	Inverse(b);
+	CRGB retVal = blend(a, b, blendAmount);
+	Correct(retVal);
+	return retVal;
+}
+
+void GammaManager::BlendInPlace(CRGB& a, CRGB b, uint8_t blendAmount) {
+	Inverse(a);
+	Inverse(b);
+	nblend(a, b, blendAmount);
+	Correct(a);
+}
+
 
 // The main test loop with serial IO
 void GammaManager::RunTests(CRGB* leds, uint8_t* leds_b, uint16_t numLEDs, uint16_t thickness, uint16_t gradientLength) {

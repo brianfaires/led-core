@@ -8,7 +8,9 @@ class GammaManager {
   public:
     void Init(const uint8_t* gamR=NULL, const uint8_t* gamG=NULL, const uint8_t* gamB=NULL, const uint8_t* gamRr=NULL, const uint8_t* gamGr=NULL, const uint8_t* gamBr=NULL, uint8_t *bright=NULL);
     void Correct(CRGB& pixel);
-    void Inverse(CRGB& pixel);    
+    void Inverse(CRGB& pixel);
+	CRGB Blend(CRGB a, CRGB b, uint8_t blendAmount);
+	void BlendInPlace(CRGB& a, CRGB b, uint8_t blendAmount);
     void RunTests(CRGB* leds, uint8_t* leds_b, uint16_t numLEDs, uint16_t thickness = 4, uint16_t gradientLength = 32);
 
   private:
