@@ -41,15 +41,15 @@ void PatternGenerator::WriteDimPattern(uint8_t targetDimPatternIndex, uint8_t* o
 }
 
 void PatternGenerator::WriteColorPattern(uint8_t targetColorPatternIndex, CRGB* outputArray) {
-  if(targetColorPatternIndex >= NUM_COLOR_PATTERNS) { THROW("targetColorPatternIndex out of bounds: " + String(targetColorPatternIndex)) }
-  if(colorPeriod > MAX_PERIOD) { THROW("colorPeriod of " + String(colorPeriod) + " is larger than MAX_PERIOD.") }
+  if(targetColorPatternIndex >= NUM_COLOR_PATTERNS) { DUMP(targetColorPatternIndex) }
+  if(colorPeriod > MAX_PERIOD) { DUMP(colorPeriod) }
   
   switch(targetColorPatternIndex) {
     case 0:  WriteColorPattern_Gradient(outputArray); break;
     default: WriteColorPattern_Blocks(outputArray); break;
   }
   
-  //for(uint8_t i =0; i < colorPeriod; i++) { Serial.println(String(i) + ": (" + outputArray[i].a + ", " + outputArray[i].b + ", " + outputArray[i].blendAmount + ")"); }
+  //for(uint8_t i =0; i < colorPeriod; i++) { Serial.println(String(i) + ": (" + outputArray[i].r + ", " + outputArray[i].g + ", " + outputArray[i].b + ")"); }
 }
 
 void PatternGenerator::WriteColorPattern_Gradient(CRGB* outputArray) {
