@@ -1,12 +1,13 @@
 #pragma once
-#include "PatternCommon.h"
+#include "Arduino.h"
+#include "FastLED.h"
 #include "GammaManager.h"
 #include "PaletteManager.h"
 
-#define GET_FADE_STEP_SIZE(x) 255.0f / (x+1)
+#include "ArduinoTrace.h"
+
 #define NUM_DIM_PATTERNS 16
 #define NUM_COLOR_PATTERNS 2
-
 
 class PatternGenerator {
   public:
@@ -30,7 +31,6 @@ class PatternGenerator {
     void WriteDimPattern_Barbell(uint8_t* outputPattern);
     void WriteDimPattern_Snake(uint8_t* outputPattern);
     void WriteDimPattern_Snake2(uint8_t* outputPattern);
-    void WriteDimPattern_Snake3(uint8_t* outputPattern);
     void WriteDimPattern_ThreeEvenComets(uint8_t* outputPattern);
     void WriteDimPattern_ThreeEvenReverseComets(uint8_t* outputPattern);
     void WriteDimPattern_Towers(uint8_t* outputPattern);
