@@ -267,6 +267,7 @@ void PatternGenerator::WriteDimPattern_SlideLow(uint8_t* outputArray) {
   FILL_SPACING()
 }
 
+// This function wants transLength to be even
 void PatternGenerator::WriteDimPattern_Bowties(uint8_t* outputArray) {
   uint8_t transInner = transLength / 2;
   uint8_t transOuter = transLength - transInner;
@@ -284,6 +285,7 @@ void PatternGenerator::WriteDimPattern_Bowties(uint8_t* outputArray) {
   FILL_SPACING()
 }
 
+// This function wants transLength to be even
 void PatternGenerator::WriteDimPattern_ReverseBowties(uint8_t* outputArray) {
   uint8_t transInner = transLength / 2;
   uint8_t transOuter = transLength - transInner;
