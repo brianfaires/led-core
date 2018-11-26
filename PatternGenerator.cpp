@@ -1,7 +1,6 @@
 #include "PatternGenerator.h"
 
 // Macros for shorthand pattern definition
-#define TEST_DIM_PERIOD(x) if(x > dimPeriod) { THROW(Out of bounds dimPeriod) DUMP(x) }
 #define GET_FADE_STEP_SIZE(x) 255.0f / (x+1)
 #define SETUP_DIM_PATTERN()  uint8_t i = 0; uint8_t limit = 0; 
 #define SETUP_FADE(x)  float fadeStepSize = GET_FADE_STEP_SIZE(x); uint8_t lastLimitMinusOne;
@@ -36,6 +35,9 @@ void PatternGenerator::Init(PaletteManager* _pm, GammaManager* gm) {
 }
 
 void PatternGenerator::WriteDimPattern(uint8_t patternIndex, uint8_t* outputArray) {
+  uint8_t brightPeriod = 2*transLength + brightLength + 9; // All patterns have a length (excluding spacing) of this
+  if(brightPeriod > dimPeriod) { THROW(Out of bounds dimPeriod) DUMP(brightPeriod) }
+
   switch(patternIndex) {
     case COMET_F:   		WriteDimPattern_Comet(outputArray); break;
     case COMET_R:   		WriteDimPattern_ReverseComet(outputArray); break;
@@ -49,9 +51,9 @@ void PatternGenerator::WriteDimPattern(uint8_t patternIndex, uint8_t* outputArra
     case BOWTIES_R:   		WriteDimPattern_ReverseBowties(outputArray); break;
     case TOWERS:  			WriteDimPattern_Towers(outputArray); break;
     case SNAKE:  			WriteDimPattern_Snake(outputArray); break;
-    case SNAKE2:  			WriteDimPattern_Snake2(outputArray); break;
-    case THREE_COMETS_F:	WriteDimPattern_ThreeEvenComets(outputArray); break;
-    case THREE_COMETS_R:	WriteDimPattern_ThreeEvenReverseComets(outputArray); break;
+    case SNAKE3:  			WriteDimPattern_Snake3(outputArray); break;
+    case THREE_COMETS_F:	WriteDimPattern_ThreeComets(outputArray); break;
+    case THREE_COMETS_R:	WriteDimPattern_ThreeReverseComets(outputArray); break;
     default:  				WriteDimPattern_NoDim(outputArray); DUMP(patternIndex); break;
   }
 
@@ -61,52 +63,11 @@ void PatternGenerator::WriteDimPattern(uint8_t patternIndex, uint8_t* outputArra
 void PatternGenerator::WriteColorPattern(uint8_t patternIndex, CRGB* outputArray) {
   switch(patternIndex) {
     case 0:  WriteColorPattern_Gradient(outputArray); break;
-    default: WriteColorPattern_Blocks(outputArray); DUMP(patternIndex); break;
+    case 1: WriteColorPattern_Blocks(outputArray); break;
+	default: DUMP(patternIndex); break;
   }
   
   //for(uint8_t i =0; i < colorPeriod; i++) { Serial.println(String(i) + ": (" + outputArray[i].r + ", " + outputArray[i].g + ", " + outputArray[i].b + ")"); }
-}
-
-uint8_t PatternGenerator::GetTransFactor(uint8_t patternIndex) {
-  switch(patternIndex) {
-    case COMET_F:   		return 1;
-    case COMET_R:   		return 1;
-    case TWO_SIDED:   		return 2; // Could be 1
-    case BARBELL:   		return 2; // Could be 1
-    case SLOPED_TOWERS_H:   return 2;
-    case SLOPED_TOWERS_L:   return 2;
-    case SLIDE_H:   		return 2;
-    case SLIDE_L:   		return 2;
-    case BOWTIES_F:   		return 2; // Could be 1
-    case BOWTIES_R:   		return 2;
-    case TOWERS:  			return 2;
-    case SNAKE:  			return 1;
-    case SNAKE2:  			return 2;
-    case THREE_COMETS_F:	return 3;
-    case THREE_COMETS_R:	return 3;
-    default:  				DUMP(patternIndex); return 1;
-  }
-}
-
-uint8_t PatternGenerator::GetBrightFactor(uint8_t patternIndex) {
-  switch(patternIndex) {
-    case COMET_F:   		return 1;
-    case COMET_R:   		return 1;
-    case TWO_SIDED:   		return 1;
-    case BARBELL:   		return 2;
-    case SLOPED_TOWERS_H:   return 1;
-    case SLOPED_TOWERS_L:   return 1;
-    case SLIDE_H:   		return 1;
-    case SLIDE_L:   		return 1;
-    case BOWTIES_F:   		return 1;
-    case BOWTIES_R:   		return 1;
-    case TOWERS:  			return 1;
-    case SNAKE:  			return 1;
-    case SNAKE2:  			return 2;
-    case THREE_COMETS_F:	return 3;
-    case THREE_COMETS_R:	return 3;
-    default:  				DUMP(patternIndex); return 1;
-  }
 }
 
 // Color patterns
@@ -173,178 +134,194 @@ void PatternGenerator::WriteColorPattern_Blocks(CRGB* outputArray) {
 
 // Dim patterns
 void PatternGenerator::WriteDimPattern_Comet(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + transLength)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength)
+  SETUP_FADE(2*transLength+9)
   
-  FADE_UP(transLength)
+  FADE_UP(2*transLength+9)
   DRAW_BRIGHT(brightLength)
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_ReverseComet(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + transLength)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength)
+  SETUP_FADE(2*transLength+9)
   
   DRAW_BRIGHT(brightLength)
-  FADE_DOWN(transLength)
+  FADE_DOWN(2*transLength+9)
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_TwoSided(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + 2*transLength)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength);
+  SETUP_FADE(transLength+4);
   
-  FADE_UP(transLength)
-  DRAW_BRIGHT(brightLength)
-  FADE_DOWN(transLength)
+  FADE_UP(transLength+4)
+  DRAW_BRIGHT(brightLength+1)
+  FADE_DOWN(transLength+4)
   FILL_SPACING()
 }
 
+// This function reverses trans and bright to keep the 2*trans + bright period
 void PatternGenerator::WriteDimPattern_Barbell(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(2*brightLength + 2*transLength)
+  uint8_t halfFade = (brightLength+9) / 2;
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength);
+  SETUP_FADE(halfFade);
   
-  DRAW_BRIGHT(brightLength)
-  FADE_DOWN(transLength)
-  FADE_UP(transLength)
-  DRAW_BRIGHT(brightLength)
+  DRAW_BRIGHT(transLength)
+  FADE_DOWN(halfFade)
+  if(2*halfFade < brightLength+9) { DRAW_SINGLE(fadeStepSize) }
+  FADE_UP(halfFade)
+  DRAW_BRIGHT(transLength)
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_SlopedHighTowers(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + 2*transLength + 2)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength)
+  SETUP_FADE(transLength+2)
   
-  FADE_DOWN(transLength)
+  SINGLE_BRIGHT()
+  FADE_DOWN(transLength+2)
   SINGLE_SPACE()
-  DRAW_BRIGHT(brightLength)
+  DRAW_BRIGHT(brightLength+1)
   SINGLE_SPACE()
-  FADE_UP(transLength)
+  FADE_UP(transLength+2)
+  SINGLE_BRIGHT()
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_SlopedLowTowers(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + transLength + 2)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength)
+  SETUP_FADE(transLength+2)
   
-  FADE_DOWN(transLength)
+  SINGLE_BRIGHT()
+  FADE_DOWN(transLength+2)
   SINGLE_SPACE()
-  DRAW_DIM(brightLength)
+  DRAW_DIM(brightLength+1)
   SINGLE_SPACE()
-  FADE_UP(transLength)
+  FADE_UP(transLength+2)
+  SINGLE_BRIGHT()
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_SlideHigh(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + transLength + 2)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength)
+  SETUP_FADE(transLength+2)
   
-  FADE_UP(transLength)
+  FADE_UP(transLength+2)
+  SINGLE_BRIGHT()
   SINGLE_SPACE()
-  DRAW_BRIGHT(brightLength)
+  DRAW_BRIGHT(brightLength+1)
   SINGLE_SPACE()
-  FADE_DOWN(transLength)
+  SINGLE_BRIGHT()
+  FADE_DOWN(transLength+2)
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_SlideLow(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + transLength + 2)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength)
+  SETUP_FADE(transLength+2)
   
-  FADE_UP(transLength)
+  FADE_UP(transLength+2)
+  SINGLE_BRIGHT()
   SINGLE_SPACE()
-  DRAW_DIM(brightLength)
+  DRAW_DIM(brightLength+1)
   SINGLE_SPACE()
-  FADE_DOWN(transLength)
+  SINGLE_BRIGHT()
+  FADE_DOWN(transLength+2)
   FILL_SPACING()
 }
 
 // This function wants transLength to be even
 void PatternGenerator::WriteDimPattern_Bowties(uint8_t* outputArray) {
-  uint8_t transInner = transLength / 2;
-  uint8_t transOuter = transLength - transInner;
+  uint8_t transOuter = (transLength+3) / 2;
+  uint8_t transInner = transLength + 3 - transOuter;
   
-  TEST_DIM_PERIOD(2*transLength + brightLength)
   SETUP_DIM_PATTERN()
   SETUP_FADE(transOuter)
   SETUP_FADE2(transInner)
 
+  SINGLE_BRIGHT()
   FADE_DOWN(transOuter)
   FADE_UP2(transInner)
-  DRAW_BRIGHT(brightLength)
+  DRAW_BRIGHT(brightLength+1)
   FADE_DOWN2(transInner)
   FADE_UP(transOuter)
+  SINGLE_BRIGHT()
   FILL_SPACING()
 }
 
 // This function wants transLength to be even
 void PatternGenerator::WriteDimPattern_ReverseBowties(uint8_t* outputArray) {
-  uint8_t transInner = transLength / 2;
-  uint8_t transOuter = transLength - transInner;
+  uint8_t transOuter = (transLength+2) / 2;
+  uint8_t transInner = transLength + 2 - transOuter;
 
-  TEST_DIM_PERIOD(2*transLength + brightLength + 2)
   SETUP_DIM_PATTERN()
   SETUP_FADE(transOuter)
   SETUP_FADE2(transInner)
 
   FADE_UP(transOuter)
+  SINGLE_BRIGHT()
   FADE_DOWN2(transInner)
   SINGLE_SPACE()
-  DRAW_BRIGHT(brightLength)
+  DRAW_BRIGHT(brightLength+1)
   SINGLE_SPACE()
   FADE_UP2(transInner)
+  SINGLE_BRIGHT()
   FADE_DOWN(transOuter)
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_Towers(uint8_t* outputArray) {
-  TEST_DIM_PERIOD(brightLength + 2*transLength + 2)
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength)
+  SETUP_FADE(transLength+2)
   
-  DRAW_DIM(transLength)
+  DRAW_DIM(transLength+2)
   SINGLE_SPACE()
-  DRAW_BRIGHT(brightLength)
+  DRAW_BRIGHT(brightLength+3)
   SINGLE_SPACE()
-  DRAW_DIM(transLength)
+  DRAW_DIM(transLength+2)
   FILL_SPACING()
 }
 
 void PatternGenerator::WriteDimPattern_Snake(uint8_t* outputArray) {
-  uint8_t adjBright = brightLength + transLength;
-  TEST_DIM_PERIOD(adjBright)
   SETUP_DIM_PATTERN()
   
-  DRAW_BRIGHT(adjBright)
+  DRAW_BRIGHT(brightLength + 2*transLength + 9)
   FILL_SPACING()
 }
 
 // This function wants the dimPeriod to be even
-void PatternGenerator::WriteDimPattern_Snake2(uint8_t* outputArray) {
-  uint8_t adjBright = brightLength + transLength;
-  uint8_t halfSpacing = (dimPeriod - 2*adjBright) / 2;
-  
-  TEST_DIM_PERIOD(2*adjBright + 2)
-  TEST_DIM_PERIOD(2*adjBright + 2*halfSpacing)
+void PatternGenerator::WriteDimPattern_Snake3(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
   
-  DRAW_BRIGHT(adjBright)
-  DRAW_SPACING(halfSpacing)
-  DRAW_BRIGHT(adjBright)
+  DRAW_BRIGHT(transLength+2)
+  SINGLE_SPACE()
+  
+  DRAW_BRIGHT(brightLength+3)
+  SINGLE_SPACE()
+  
+  DRAW_BRIGHT(transLength+2)
   FILL_SPACING()
 }
 
-void PatternGenerator::WriteDimPattern_ThreeEvenComets(uint8_t* outputArray) {
-  uint8_t adjBright = transLength + brightLength;
-  TEST_DIM_PERIOD(3*adjBright + 3)
+void PatternGenerator::WriteDimPattern_ThreeComets(uint8_t* outputArray) {
+  SETUP_DIM_PATTERN()
+  SETUP_FADE(transLength+1)
+  SETUP_FADE2(brightLength+2)
+  
+  FADE_UP(transLength+1)
+  SINGLE_BRIGHT()
+  SINGLE_SPACE()
+  
+  FADE_UP2(brightLength+2)
+  SINGLE_BRIGHT()
+  SINGLE_SPACE()
+  
+  FADE_UP(transLength+1)
+  SINGLE_BRIGHT()
+  FILL_SPACING()
+  
+  /*uint8_t adjBright = transLength + brightLength;
   SETUP_DIM_PATTERN()
   SETUP_FADE(adjBright-1)
   
@@ -358,12 +335,27 @@ void PatternGenerator::WriteDimPattern_ThreeEvenComets(uint8_t* outputArray) {
   
   FADE_UP(adjBright-1)
   SINGLE_BRIGHT()
-  FILL_SPACING()
+  FILL_SPACING()*/
 }
 
-void PatternGenerator::WriteDimPattern_ThreeEvenReverseComets(uint8_t* outputArray) {
-  uint8_t adjBright = transLength + brightLength;
-  TEST_DIM_PERIOD(3*adjBright + 3)
+void PatternGenerator::WriteDimPattern_ThreeReverseComets(uint8_t* outputArray) {
+  SETUP_DIM_PATTERN()
+  SETUP_FADE(transLength+1)
+  SETUP_FADE2(brightLength+2)
+  
+  SINGLE_BRIGHT()
+  FADE_DOWN(transLength+1)
+  SINGLE_SPACE()
+  
+  SINGLE_BRIGHT()
+  FADE_DOWN2(brightLength+2)
+  SINGLE_SPACE()
+  
+  SINGLE_BRIGHT()
+  FADE_DOWN(transLength+1)
+  FILL_SPACING()
+  
+  /*uint8_t adjBright = transLength + brightLength;
   SETUP_DIM_PATTERN()
   SETUP_FADE(adjBright-1)
   
@@ -377,7 +369,7 @@ void PatternGenerator::WriteDimPattern_ThreeEvenReverseComets(uint8_t* outputArr
   
   SINGLE_BRIGHT()
   FADE_DOWN(adjBright-1)
-  FILL_SPACING()
+  FILL_SPACING()*/
 }
 
 void PatternGenerator::WriteDimPattern_NoDim(uint8_t* outputArray) {
@@ -416,4 +408,3 @@ void PatternGenerator::WriteDimPattern_StepBarbell(uint8_t* outputArray) {
   }
 }
 */
-
