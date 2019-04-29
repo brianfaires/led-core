@@ -3,7 +3,6 @@
 #include "FastLED.h"
 #include "GammaManager.h"
 #include "PaletteManager.h"
-
 #include "ArduinoTrace.h"
 
 #define NUM_DIM_PATTERNS 15
