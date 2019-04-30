@@ -3,7 +3,8 @@
 // Macros for shorthand pattern definition
 #define GET_FADE_STEP_SIZE(x) 255.0f / (x+1)
 #define SETUP_DIM_PATTERN()  uint8_t i = 0; uint8_t limit = 0; 
-#define SETUP_FADE(x)  float fadeStepSize = GET_FADE_STEP_SIZE(x); uint8_t lastLimitMinusOne;
+#define SETUP_FADE_DOWN(x)  float fadeStepSize = GET_FADE_STEP_SIZE(x);
+#define SETUP_FADES(x) float fadeStepSize = GET_FADE_STEP_SIZE(x); uint8_t lastLimitMinusOne;
 #define REBUILD_FADE(x) fadeStepSize = GET_FADE_STEP_SIZE(x);
 #define SETUP_FADE2(x) float fadeStepSize2 = GET_FADE_STEP_SIZE(x);
 
@@ -135,7 +136,7 @@ void PatternGenerator::WriteColorPattern_Blocks(CRGB* outputArray) {
 // Dim patterns
 void PatternGenerator::WriteDimPattern_Comet(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(2*transLength+9)
+  SETUP_FADES(2*transLength+9)
   
   FADE_UP(2*transLength+9)
   DRAW_BRIGHT(brightLength)
@@ -144,7 +145,7 @@ void PatternGenerator::WriteDimPattern_Comet(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_ReverseComet(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(2*transLength+9)
+  SETUP_FADE_DOWN(2*transLength+9)
   
   DRAW_BRIGHT(brightLength)
   FADE_DOWN(2*transLength+9)
@@ -153,7 +154,7 @@ void PatternGenerator::WriteDimPattern_ReverseComet(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_TwoSided(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+4);
+  SETUP_FADES(transLength+4);
   
   FADE_UP(transLength+4)
   DRAW_BRIGHT(brightLength+1)
@@ -165,7 +166,7 @@ void PatternGenerator::WriteDimPattern_TwoSided(uint8_t* outputArray) {
 void PatternGenerator::WriteDimPattern_Barbell(uint8_t* outputArray) {
   uint8_t halfFade = (brightLength+9) / 2;
   SETUP_DIM_PATTERN()
-  SETUP_FADE(halfFade);
+  SETUP_FADES(halfFade);
   
   DRAW_BRIGHT(transLength)
   FADE_DOWN(halfFade)
@@ -177,7 +178,7 @@ void PatternGenerator::WriteDimPattern_Barbell(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_SlopedHighTowers(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+2)
+  SETUP_FADES(transLength+2)
   
   SINGLE_BRIGHT()
   FADE_DOWN(transLength+2)
@@ -191,7 +192,7 @@ void PatternGenerator::WriteDimPattern_SlopedHighTowers(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_SlopedLowTowers(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+2)
+  SETUP_FADES(transLength+2)
   
   SINGLE_BRIGHT()
   FADE_DOWN(transLength+2)
@@ -205,7 +206,7 @@ void PatternGenerator::WriteDimPattern_SlopedLowTowers(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_SlideHigh(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+2)
+  SETUP_FADES(transLength+2)
   
   FADE_UP(transLength+2)
   SINGLE_BRIGHT()
@@ -219,7 +220,7 @@ void PatternGenerator::WriteDimPattern_SlideHigh(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_SlideLow(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+2)
+  SETUP_FADES(transLength+2)
   
   FADE_UP(transLength+2)
   SINGLE_BRIGHT()
@@ -237,7 +238,7 @@ void PatternGenerator::WriteDimPattern_Bowties(uint8_t* outputArray) {
   uint8_t transInner = transLength + 3 - transOuter;
   
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transOuter)
+  SETUP_FADES(transOuter)
   SETUP_FADE2(transInner)
 
   SINGLE_BRIGHT()
@@ -256,7 +257,7 @@ void PatternGenerator::WriteDimPattern_ReverseBowties(uint8_t* outputArray) {
   uint8_t transInner = transLength + 2 - transOuter;
 
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transOuter)
+  SETUP_FADES(transOuter)
   SETUP_FADE2(transInner)
 
   FADE_UP(transOuter)
@@ -273,7 +274,6 @@ void PatternGenerator::WriteDimPattern_ReverseBowties(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_Towers(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+2)
   
   DRAW_DIM(transLength+2)
   SINGLE_SPACE()
@@ -306,7 +306,7 @@ void PatternGenerator::WriteDimPattern_Snake3(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_ThreeComets(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+1)
+  SETUP_FADES(transLength+1)
   SETUP_FADE2(brightLength+2)
   
   FADE_UP(transLength+1)
@@ -323,7 +323,7 @@ void PatternGenerator::WriteDimPattern_ThreeComets(uint8_t* outputArray) {
   
   /*uint8_t adjBright = transLength + brightLength;
   SETUP_DIM_PATTERN()
-  SETUP_FADE(adjBright-1)
+  SETUP_FADES(adjBright-1)
   
   FADE_UP(adjBright-1)
   SINGLE_BRIGHT()
@@ -340,7 +340,7 @@ void PatternGenerator::WriteDimPattern_ThreeComets(uint8_t* outputArray) {
 
 void PatternGenerator::WriteDimPattern_ThreeReverseComets(uint8_t* outputArray) {
   SETUP_DIM_PATTERN()
-  SETUP_FADE(transLength+1)
+  SETUP_FADE_DOWN(transLength+1)
   SETUP_FADE2(brightLength+2)
   
   SINGLE_BRIGHT()
@@ -357,7 +357,7 @@ void PatternGenerator::WriteDimPattern_ThreeReverseComets(uint8_t* outputArray) 
   
   /*uint8_t adjBright = transLength + brightLength;
   SETUP_DIM_PATTERN()
-  SETUP_FADE(adjBright-1)
+  SETUP_FADE_DOWN(adjBright-1)
   
   SINGLE_BRIGHT()
   FADE_DOWN(adjBright-1)
